@@ -73,7 +73,7 @@ const fetchResult = (token: string) =>
         clearInterval(timer)
         reject(ex)
       }
-    }, 3000)
+    }, 2000)
 
     setTimeout(() => {
       clearInterval(timer)

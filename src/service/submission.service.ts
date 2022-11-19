@@ -3,6 +3,7 @@ import { ExtSocket } from '@/types/socket'
 import ApiError from '@/utils/ApiError'
 import httpStatus from 'http-status'
 import { compile, Language, Response, Status } from './compiler.service'
+import { EVENTS } from './socketHandler.service'
 
 interface SubmitAssignment {
   assignmentId: number
@@ -56,21 +57,26 @@ export const handleCustomRun = async (socket: ExtSocket, data: SubmitAssignment)
   const { stdin, language, sourceCode } = data
   try {
     const response = await compile(sourceCode, language, ' ', stdin || ' ')
-    socket.emit('ack', response)
+    socket.emit(EVENTS.customRun, response)
   } catch (ex) {
-    socket.emit('ack', 'error occured' + ex)
+    socket.emit(EVENTS.customRun, 'error occured' + ex)
   }
 }
 
 export const handleSaveCode = async (socket: ExtSocket, data: SubmitAssignment) => {
-  const { language, sourceCode, assignmentId } = data
-
-  const studentId = socket.request.user.id
-
-  await prisma.submission.upsert({
-    create: { assignmentId, result: Status.processing, language, submission: sourceCode, studentId },
-    update: { language, submission: sourceCode, result: Status.processing },
-    where: { assignmentId_studentId: { assignmentId, studentId } },
-  })
-  socket.emit('ack', 'done')
+  try {
+    const { language, sourceCode, assignmentId } = data
+    // throw new Error('fdsa')
+    const studentId = socket.request.user?.id || 1
+    await prisma.submission.upsert({
+      create: { assignmentId, result: Status.processing, language, submission: sourceCode, studentId },
+      update: { language, submission: sourceCode, result: Status.processing },
+      where: { assignmentId_studentId: { assignmentId, studentId } },
+    })
+    console.log('saved code')
+    socket.emit(EVENTS.save, 'success')
+  } catch (ex) {
+    console.log('error')
+    socket.emit(EVENTS.save, 'error')
+  }
 }

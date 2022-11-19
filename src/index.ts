@@ -11,7 +11,11 @@ const server = app.listen(APP_PORT, () => {
 })
 
 const wrap = (middleware) => (socket, next) => middleware(socket.request, {}, next)
-const io = new Server(server)
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+  },
+})
 io.use(wrap(passport.initialize()))
 io.use(wrap(auth()))
 io.on('connection', handleSocketConnection)
