@@ -16,7 +16,7 @@ export interface JWTPayload {
 }
 
 export const getUserInfo = async (id: number) => {
-  return await prisma.user.findFirst({
+  return await prisma.user.findFirstOrThrow({
     where: {
       id,
     },
@@ -48,7 +48,7 @@ export const jwtStrategy = new JwtStrategy(
 )
 
 export const auth = () => {
-  return passport.authenticate('jwt', { session: false })
+  return passport.authenticate('jwt', { session: false, assignProperty: 'loggedInUser' })
 }
 
 export const anonymousStrategy = new AnonymousStrategy()

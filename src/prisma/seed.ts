@@ -1,16 +1,32 @@
 import { hashPassword } from '@/service/auth.service'
 import prisma from './prisma'
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const seed = async () => {
   return await prisma.$transaction(
     async (prisma) => {
-      await prisma.user.create({
+      const student = await prisma.user.create({
         data: {
-          email: 'test@test.com',
-          fullName: 'test user',
+          email: 'student@test.com',
+          fullName: 'student user',
           role: 'Student',
           password: await hashPassword('12345678'),
+        },
+      })
+
+      const teacher = await prisma.user.create({
+        data: {
+          email: 'teacher@test.com',
+          fullName: 'teacher user',
+          role: 'Teacher',
+          password: await hashPassword('12345678'),
+        },
+      })
+
+      const class1 = await prisma.class.create({
+        data: {
+          description: 'some nice description for class',
+          name: 'class 1',
+          createdById: teacher.id,
         },
       })
       await prisma.assignment.create({
@@ -26,6 +42,8 @@ const seed = async () => {
               ],
             },
           },
+          createdById: teacher.id,
+          classId: class1.id,
         },
       })
     },

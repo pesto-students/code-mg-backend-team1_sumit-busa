@@ -4,12 +4,12 @@ import { Role } from '@prisma/client'
 export default function verifyRole(permittedRoles: Role[]) {
   
     return (request, response, next) => {
-      const { user } = request
+      const { loggedInUser } = request
   
-      if (user && (permittedRoles.includes(user.role)==true)) {
-        next(); 
+      if (loggedInUser && permittedRoles.includes(loggedInUser.role) == true) {
+        next()
       } else {
-        response.status(403).json({message: "Forbidden"});
+        response.status(403).json({ message: 'Forbidden' })
       }
     }
   }

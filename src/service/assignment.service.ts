@@ -1,14 +1,25 @@
+import { LoggedInUserType } from '@/config/passport'
 import prisma from '@/prisma/prisma'
+import { CreateAssignment } from '@/routes/assignment.route'
+import { z } from 'zod'
 
-export const getAssignment = async (id: number | null, loggedInUser: Express.User) => {
-  if (id !== null) {
-    return await prisma.assignment.findUnique({
-      where: { id },
-      include: {
-        submissions: { where: { studentId: loggedInUser.id } },
+export const createAssignment = async (data: z.infer<typeof CreateAssignment>, loggedInUser: LoggedInUserType) => {
+  const { title, problemStatement, allowedLanguages, testCases, classId } = data
+
+  const assignment = await prisma.assignment.create({
+    data: {
+      title,
+      allowedLanguages,
+      problemStatement,
+      classId,
+      testCases: {
+        createMany: {
+          data: testCases,
+        },
       },
-    })
-  }
-  //todo return only assigned
-  return await prisma.assignment.findMany({})
+      createdById: loggedInUser.id,
+    },
+  })
+
+  return assignment
 }

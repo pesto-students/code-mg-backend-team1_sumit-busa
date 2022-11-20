@@ -36,8 +36,8 @@ export type Response = {
 export const compile = async (
   source_code: string,
   language: keyof typeof Language,
-  expected_output: string = null,
-  stdin: string = null,
+  expected_output: string | null = null,
+  stdin: string | null = null,
 ) => {
   const language_id = Language[language]
   console.log('uploading')

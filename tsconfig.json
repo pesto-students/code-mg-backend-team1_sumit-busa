@@ -3,6 +3,7 @@
       "typeRoots": ["./src/types"],
       "types": ["@types/jest"],
       "esModuleInterop": true,
+      "strictNullChecks":true,
       "target": "es2018",
       "noImplicitAny": false,
       "moduleResolution": "node",
