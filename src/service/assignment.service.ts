@@ -28,13 +28,14 @@ export const getAssignments = async (loggedInUser: LoggedInUserType) => {
 }
 
 export const createAssignment = async (data: z.infer<typeof CreateAssignment>, loggedInUser: LoggedInUserType) => {
-  const { title, problemStatement, allowedLanguages, testCases } = data
+  const { title, problemStatement, allowedLanguages, testCases, classId } = data
 
   const assignment = await prisma.assignment.create({
     data: {
       title,
       allowedLanguages,
       problemStatement,
+      classId,
       testCases: {
         createMany: {
           data: testCases,

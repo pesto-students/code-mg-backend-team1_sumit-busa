@@ -50,7 +50,7 @@ export const login = async (data: loginPayload): resPayload => {
     const jwtPayload: Omit<JWTPayload, 'exp' | 'iat'> = {
       id: user.id,
       email: user.email,
-      fullName: user.fullName,
+      fullName: user.fullName || '',
       role: user.role,
     }
     token = jwt.sign(jwtPayload, JWT_SECRET, { expiresIn: '1d' })

@@ -5,7 +5,6 @@ import { IS_PRODUCTION, IS_TEST } from '../config/config'
 import logger from '../config/logger'
 import { NotFoundError, PrismaClientValidationError } from '@prisma/client/runtime'
 import { NextFunction, Request, Response } from 'express'
-import { Role } from '@prisma/client'
 import { ZodError } from 'zod'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

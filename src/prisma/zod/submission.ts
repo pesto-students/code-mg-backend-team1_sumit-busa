@@ -1,5 +1,4 @@
 import * as z from "zod"
-import { CompleteAssignment, RelatedAssignmentModel } from "./index"
 
 // Helper schema for JSON fields
 type Literal = boolean | number | string
@@ -15,16 +14,3 @@ export const SubmissionModel = z.object({
   studentId: z.number().int().nullish(),
   result: jsonSchema,
 })
-
-export interface CompleteSubmission extends z.infer<typeof SubmissionModel> {
-  assignment: CompleteAssignment
-}
-
-/**
- * RelatedSubmissionModel contains all relations on your model in addition to the scalars
- *
- * NOTE: Lazy required in case of potential circular dependencies within schema
- */
-export const RelatedSubmissionModel: z.ZodSchema<CompleteSubmission> = z.lazy(() => SubmissionModel.extend({
-  assignment: RelatedAssignmentModel,
-}))
