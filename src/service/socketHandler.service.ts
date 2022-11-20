@@ -9,7 +9,7 @@ export const EVENTS = {
 
 export const handleSocketConnection = (socket: ExtSocket) => {
   //
-  console.log(socket.request.user)
+  console.log(socket.request?.loggedInUser)
   socket.on(EVENTS.submit, (payload) => handleAssignmentSubmit(socket, payload))
 
   socket.on(EVENTS.customRun, (payload) => handleCustomRun(socket, payload))

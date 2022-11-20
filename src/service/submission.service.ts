@@ -19,7 +19,7 @@ export const handleAssignmentSubmit = async (socket: ExtSocket, data: string) =>
     throw new ApiError(httpStatus.NOT_FOUND, `Assignment with ${assignmentId} id not found`)
   }
 
-  const studentId = socket.request.user.id
+  const studentId = socket.request?.loggedInUser?.id || -1
   const submission = await prisma.submission.upsert({
     create: { assignmentId, result: Status.processing, language, submission: sourceCode, studentId },
     update: { language, submission: sourceCode, result: Status.processing },
@@ -67,7 +67,7 @@ export const handleSaveCode = async (socket: ExtSocket, data: SubmitAssignment) 
   try {
     const { language, sourceCode, assignmentId } = data
     // throw new Error('fdsa')
-    const studentId = socket.request.user?.id || 1
+    const studentId = socket.request?.loggedInUser?.id || -1
     await prisma.submission.upsert({
       create: { assignmentId, result: Status.processing, language, submission: sourceCode, studentId },
       update: { language, submission: sourceCode, result: Status.processing },

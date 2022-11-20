@@ -4,20 +4,43 @@ generator client {
   binaryTargets   = ["native", "debian-openssl-1.1.x"]
 }
 
+generator zod {
+  provider                 = "zod-prisma"
+  output                   = "./zod" // (default) the directory where generated zod schemas will be saved
+
+  relationModel            = true // (default) Create and export both plain and related models.
+  // relationModel         = "default" // Do not export model without relations.
+  // relationModel         = false // Do not generate related model
+
+  modelCase                = "PascalCase" // (default) Output models using pascal case (ex. UserModel, PostModel)
+  // modelCase             = "camelCase" // Output models using camel case (ex. userModel, postModel)
+
+  modelSuffix              = "Model" // (default) Suffix to apply to your prisma models when naming Zod schemas
+
+  // useDecimalJs          = false // (default) represent the prisma Decimal type using as a JS number
+  useDecimalJs             = true // represent the prisma Decimal type using Decimal.js (as Prisma does)
+
+
+  // https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-by-null-values
+  prismaJsonNullability    = true // (default) uses prisma's scheme for JSON field nullability
+  // prismaJsonNullability = false // allows null assignment to optional JSON fields
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DB_URI")
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  fullName  String   @db.VarChar(100)
-  email     String   @unique @db.VarChar(100)
-  mobile    String?  @db.VarChar(15)
-  password  String?  @db.VarChar(200)
-  role      Role
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         Int          @id @default(autoincrement())
+  fullName   String       @db.VarChar(100)
+  email      String       @unique @db.VarChar(100)
+  mobile     String?      @db.VarChar(15)
+  password   String?      @db.VarChar(200)
+  role       Role
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  assignments Assignment[]
 }
 
 enum Role {
@@ -30,6 +53,8 @@ model Assignment {
   id               Int          @id @default(autoincrement())
   title            String
   problemStatement String
+  createdById      Int
+  createdBy        User         @relation(fields: [createdById], references: [id])
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
   allowedLanguages String[]
@@ -56,5 +81,5 @@ model Submission {
   assignment   Assignment @relation(fields: [assignmentId], references: [id])
   result       Json?
 
-  @@unique([assignmentId,studentId])
+  @@unique([assignmentId, studentId])
 }

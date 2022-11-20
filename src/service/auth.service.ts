@@ -17,7 +17,8 @@ export const hashPassword = async (password: string): Promise<string> => {
 export const register = async (data: User, userRole: Role): Promise<User> => {
   const { email, fullName, mobile, password } = data
 
-  const hashedPassword = await hashPassword(password)
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const hashedPassword = await hashPassword(password!)
 
   prisma.user.findFirst({ where: {} })
 
@@ -36,12 +37,12 @@ export const register = async (data: User, userRole: Role): Promise<User> => {
 type loginPayload = { email: string; password: string }
 type resPayload = Promise<{ token: string }>
 export const login = async (data: loginPayload): resPayload => {
-  const user = await prisma.user.findFirst({
+  const user = await prisma.user.findFirstOrThrow({
     where: { email: data.email },
     select: { password: true, email: true, fullName: true, id: true, role: true },
   })
 
-  if (!user) throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid email or password')
+  if (!user || !user.password) throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid email or password')
 
   const isValid = await bcrypt.compare(data.password, user.password)
   let token = ''
