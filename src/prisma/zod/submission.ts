@@ -1,4 +1,5 @@
 import * as z from "zod"
+import { SubmissionStatus } from "@prisma/client"
 
 // Helper schema for JSON fields
 type Literal = boolean | number | string
@@ -12,5 +13,8 @@ export const SubmissionModel = z.object({
   language: z.string(),
   assignmentId: z.number().int(),
   studentId: z.number().int().nullish(),
+  status: z.nativeEnum(SubmissionStatus),
   result: jsonSchema,
+  createdAt: z.date(),
+  updatedAt: z.date(),
 })

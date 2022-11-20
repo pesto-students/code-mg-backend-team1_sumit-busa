@@ -1,7 +1,6 @@
 import prisma from '@/prisma/prisma'
 import { ExtSocket } from '@/types/socket'
-import ApiError from '@/utils/ApiError'
-import httpStatus from 'http-status'
+import { SubmissionStatus } from '@prisma/client'
 import { compile, Language, Response, Status } from './compiler.service'
 import { EVENTS } from './socketHandler.service'
 
@@ -11,46 +10,50 @@ interface SubmitAssignment {
   language: keyof typeof Language
   stdin?: string
 }
-export const handleAssignmentSubmit = async (socket: ExtSocket, data: string) => {
-  const { assignmentId, language, sourceCode }: SubmitAssignment = JSON.parse(data)
+export const handleAssignmentSubmit = async (socket: ExtSocket, data: SubmitAssignment) => {
+  const { assignmentId, language, sourceCode } = data
 
   const assignment = await prisma.assignment.findUnique({ where: { id: assignmentId }, include: { testCases: true } })
   if (!assignment) {
-    throw new ApiError(httpStatus.NOT_FOUND, `Assignment with ${assignmentId} id not found`)
+    const error = `Assignment with ${assignmentId} id not found`
+    socket.emit(EVENTS.submit, 'error : ' + error)
+    return
   }
 
-  const studentId = socket.request?.loggedInUser?.id || -1
-  const submission = await prisma.submission.upsert({
-    create: { assignmentId, result: Status.processing, language, submission: sourceCode, studentId },
-    update: { language, submission: sourceCode, result: Status.processing },
-    where: { assignmentId_studentId: { assignmentId, studentId } },
-  })
-  socket.emit('ack', 'code uploaded')
-
-  const promises = assignment.testCases.map((test) => {
-    return new Promise<{ testCaseId: number; response: Response; expected: string }>(async (resolve, reject) => {
-      try {
-        const response = await compile(sourceCode, language, test.expectedOutput, test.input)
-        const result = { testCaseId: test.id, response, expected: test.expectedOutput }
-        socket.emit('ack', result)
-        resolve(result)
-      } catch (ex) {
-        reject(ex)
-      }
+  try {
+    const studentId = socket.request?.loggedInUser?.id || -1
+    const submission = await prisma.submission.upsert({
+      create: { assignmentId, result: Status.processing, language, submission: sourceCode, studentId },
+      update: { language, submission: sourceCode, result: Status.processing },
+      where: { assignmentId_studentId: { assignmentId, studentId } },
     })
-  })
+    socket.emit(EVENTS.submit, 'code uploaded')
 
-  const result = await Promise.all(promises)
-  const totalCount = result.length
-  const successCount = result.filter((r) => r.response.status.id === Status.success.id).length
-  const errorCount = totalCount - successCount
-  socket.emit('ack', {
-    totalCount,
-    successCount,
-    errorCount,
-  })
-  await prisma.submission.update({ where: { id: submission.id }, data: { result } })
-  return result
+    const promises = assignment.testCases.map((test) => {
+      return new Promise<{ testCaseId: number; response: Response; expected: string }>(async (resolve, reject) => {
+        try {
+          const response = await compile(sourceCode, language, test.expectedOutput, test.input)
+          const result = { testCaseId: test.id, response, expected: test.expectedOutput }
+          socket.emit(EVENTS.submit, result)
+          resolve(result)
+        } catch (ex) {
+          reject(ex)
+        }
+      })
+    })
+
+    const response = await Promise.all(promises)
+    const totalCount = response.length
+    const successCount = response.filter((r) => r.response.status.id === Status.success.id).length
+    const errorCount = totalCount - successCount
+    const result = { totalCount, successCount, errorCount }
+    const status = totalCount === successCount ? SubmissionStatus.Pass : SubmissionStatus.Fail
+    socket.emit(EVENTS.submit, result)
+    await prisma.submission.update({ where: { id: submission.id }, data: { result: { ...result, response }, status } })
+    return result
+  } catch (ex) {
+    socket.emit(EVENTS.submit, 'error : something went wrong')
+  }
 }
 
 export const handleCustomRun = async (socket: ExtSocket, data: SubmitAssignment) => {
@@ -59,7 +62,7 @@ export const handleCustomRun = async (socket: ExtSocket, data: SubmitAssignment)
     const response = await compile(sourceCode, language, ' ', stdin || ' ')
     socket.emit(EVENTS.customRun, response)
   } catch (ex) {
-    socket.emit(EVENTS.customRun, 'error occured' + ex)
+    socket.emit(EVENTS.customRun, 'error')
   }
 }
 

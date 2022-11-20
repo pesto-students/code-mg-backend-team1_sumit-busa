@@ -1,7 +1,7 @@
 import { auth } from '@/config/passport'
 import verifyRole from '@/middlewares/auth'
 import { AssignmentModel, TestCasesModel } from '@/prisma/zod'
-import { createAssignment, getAssignment, getAssignments } from '@/service/assignment.service'
+import { createAssignment } from '@/service/assignment.service'
 import { Language } from '@/service/compiler.service'
 
 import express from 'express'
@@ -11,20 +11,20 @@ const router = express.Router()
 router.use(auth())
 
 router.get('/', async (req, res) => {
-  const { loggedInUser } = req
-  const result = await getAssignments(loggedInUser)
+  // const { loggedInUser } = req
+  // const result = await getAssignments(loggedInUser)
 
-  res.send(result)
+  res.send('here')
 })
 
-router.get('/:id', async (req, res) => {
-  const { id } = req.params
-  const { loggedInUser } = req
+// router.get('/:id', async (req, res) => {
+//   const { id } = req.params
+//   const { loggedInUser } = req
 
-  const result = await getAssignment(parseInt(id), loggedInUser)
+//   const result = await getAssignment(parseInt(id), loggedInUser)
 
-  res.send(result)
-})
+//   res.send(result)
+// })
 
 const TestCasesCreate = z.object({
   testCases: z.array(TestCasesModel.pick({ expectedOutput: true, input: true })).min(1),

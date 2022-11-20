@@ -2,6 +2,7 @@ import { LoggedInUserType } from '@/config/passport'
 import prisma from '@/prisma/prisma'
 import { AddStudentsInput, CreateClassInput } from '@/routes/class.route'
 import { ForbiddenError } from '@/utils/Errors'
+import { Role } from '@prisma/client'
 import { z } from 'zod'
 
 export const createClass = async (data: z.infer<typeof CreateClassInput>, user: LoggedInUserType) => {
@@ -13,7 +14,7 @@ export const createClass = async (data: z.infer<typeof CreateClassInput>, user: 
 
 export const addStudents = async (data: z.infer<typeof AddStudentsInput>, user: LoggedInUserType) => {
   const { classId, emails } = data
-  validateClass(classId, user)
+  await validateClass(classId, user)
 
   for (const email of emails) {
     await prisma.class.update({
@@ -24,8 +25,14 @@ export const addStudents = async (data: z.infer<typeof AddStudentsInput>, user: 
 }
 
 export const validateClass = async (id: number, user: LoggedInUserType) => {
-  const result = await prisma.class.findUniqueOrThrow({ where: { id } })
-  if (result.createdById !== user.id) {
+  const result = await prisma.class.findUniqueOrThrow({
+    where: { id },
+    include: { students: { where: { id: user.id } } },
+  })
+
+  if (user.role === Role.Teacher && result.createdById !== user.id) {
+    throw new ForbiddenError()
+  } else if (user.role === Role.Student && (!result.students || result.students.length === 0)) {
     throw new ForbiddenError()
   }
 }

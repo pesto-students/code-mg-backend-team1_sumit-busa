@@ -16,5 +16,4 @@ export const handleSocketConnection = (socket: ExtSocket) => {
 
   socket.on(EVENTS.save, (payload) => handleSaveCode(socket, payload))
 
-  socket.on('Error', () => console.log('Error'))
 }
