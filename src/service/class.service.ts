@@ -12,6 +12,29 @@ export const createClass = async (data: z.infer<typeof CreateClassInput>, user: 
   return result
 }
 
+export const getListOfClasses = async (loggedInUser: LoggedInUserType) => {
+  const { role, id } = loggedInUser
+  if (role === Role.Teacher) {
+    return listOfClassesForTeacher(id)
+  } else {
+    return listOfClassesForStudent(id)
+  }
+}
+
+const listOfClassesForTeacher = async (teacherId: number) => {
+  return await prisma.class.findMany({
+    where: { createdById: teacherId },
+    include: { _count: { select: { assignments: true, students: true } } },
+  })
+}
+
+const listOfClassesForStudent = async (studentId: number) => {
+  return await prisma.class.findMany({
+    where: { students: { some: { id: studentId } } },
+    include: { _count: { select: { assignments: true } } },
+  })
+}
+
 export const addStudents = async (data: z.infer<typeof AddStudentsInput>, user: LoggedInUserType) => {
   const { classId, emails } = data
   await validateClass(classId, user)
