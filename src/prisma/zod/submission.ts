@@ -12,7 +12,7 @@ export const SubmissionModel = z.object({
   submission: z.string(),
   language: z.string(),
   assignmentId: z.number().int(),
-  studentId: z.number().int().nullish(),
+  studentId: z.number().int(),
   status: z.nativeEnum(SubmissionStatus),
   result: jsonSchema,
   createdAt: z.date(),
