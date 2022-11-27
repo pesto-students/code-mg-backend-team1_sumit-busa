@@ -10,22 +10,6 @@ import { z } from 'zod'
 const router = express.Router()
 router.use(auth())
 
-router.get('/', async (req, res) => {
-  // const { loggedInUser } = req
-  // const result = await getAssignments(loggedInUser)
-
-  res.send('here')
-})
-
-// router.get('/:id', async (req, res) => {
-//   const { id } = req.params
-//   const { loggedInUser } = req
-
-//   const result = await getAssignment(parseInt(id), loggedInUser)
-
-//   res.send(result)
-// })
-
 const TestCasesCreate = z.object({
   testCases: z.array(TestCasesModel.pick({ expectedOutput: true, input: true })).min(1),
 })

@@ -42,6 +42,7 @@ model User {
   assignments     Assignment[]
   createdClasses  Class[]      @relation(name: "teacher_class")
   assignedClasses Class[]
+  submission      Submission[]
 }
 
 enum Role {
@@ -92,7 +93,8 @@ model Submission {
   submission   String
   language     String
   assignmentId Int
-  studentId    Int?
+  studentId    Int
+  student      User             @relation(fields: [studentId], references: [id])
   assignment   Assignment       @relation(fields: [assignmentId], references: [id])
   status       SubmissionStatus @default(Processing)
   result       Json?
