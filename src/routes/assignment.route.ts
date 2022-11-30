@@ -26,7 +26,7 @@ export const CreateAssignment = AssignmentModel.pick({
   .merge(
     z.object({
       allowedLanguages: z.array(z.enum([allowedLanguages[0], ...allowedLanguages])).optional(),
-      maximumRunTime: z.number().min(0).max(30).optional().default(5),
+      maximumRunTime: z.number().min(0).max(15).optional().default(5),
       dueDate: z
         .string()
         .optional()

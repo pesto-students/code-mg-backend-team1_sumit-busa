@@ -32,7 +32,13 @@ export const handleAssignmentSubmit = async (socket: ExtSocket, data: SubmitAssi
     const promises = assignment.testCases.map((test) => {
       return new Promise<{ testCaseId: number; response: Response; expected: string }>(async (resolve, reject) => {
         try {
-          const response = await compile(sourceCode, language, test.expectedOutput, test.input)
+          const response = await compile(
+            sourceCode,
+            language,
+            test.expectedOutput,
+            test.input,
+            assignment.maximumRunTime,
+          )
           const result = { testCaseId: test.id, response, expected: test.expectedOutput }
           socket.emit(EVENTS.submit, result)
           resolve(result)
