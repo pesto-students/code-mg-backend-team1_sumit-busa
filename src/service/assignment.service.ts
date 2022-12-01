@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { validateClass } from './class.service'
 
 export const createAssignment = async (data: z.infer<typeof CreateAssignment>, loggedInUser: LoggedInUserType) => {
-  const { title, problemStatement, allowedLanguages, testCases, classId } = data
+  const { title, problemStatement, allowedLanguages, testCases, classId, dueDate, maximumRunTime } = data
 
   const assignment = await prisma.assignment.create({
     data: {
@@ -19,6 +19,8 @@ export const createAssignment = async (data: z.infer<typeof CreateAssignment>, l
           data: testCases,
         },
       },
+      maximumRunTime,
+      dueDate,
       createdById: loggedInUser.id,
     },
   })

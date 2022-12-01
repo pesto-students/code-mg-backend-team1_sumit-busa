@@ -73,6 +73,8 @@ model Assignment {
   updatedAt        DateTime     @updatedAt
   allowedLanguages String[]
   submissions      Submission[]
+  dueDate          DateTime     @default(now())
+  maximumRunTime   Int          @default(5)
   testCases        TestCases[]
   Class            Class        @relation(fields: [classId], references: [id])
   classId          Int

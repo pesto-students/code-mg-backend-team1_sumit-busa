@@ -8,5 +8,7 @@ export const AssignmentModel = z.object({
   createdAt: z.date(),
   updatedAt: z.date(),
   allowedLanguages: z.string().array(),
+  dueDate: z.date(),
+  maximumRunTime: z.number().int(),
   classId: z.number().int(),
 })

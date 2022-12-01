@@ -12,6 +12,8 @@ export const getAssignments = async (classId: number, loggedInUser: LoggedInUser
       _count: {
         select: { submissions: true },
       },
+      createdAt: true,
+      dueDate: true,
     },
   })
   return result

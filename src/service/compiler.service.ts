@@ -38,6 +38,7 @@ export const compile = async (
   language: keyof typeof Language,
   expected_output: string | null = null,
   stdin: string | null = null,
+  cpu_time_limit: number | null = null,
 ) => {
   const language_id = Language[language]
   console.log('uploading')
@@ -49,6 +50,7 @@ export const compile = async (
     language_id,
     expected_output,
     stdin,
+    cpu_time_limit,
   })
 
   const result = await fetchResult(token)

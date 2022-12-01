@@ -18,18 +18,28 @@ export const CreateAssignment = AssignmentModel.pick({
   allowedLanguages: true,
   problemStatement: true,
   classId: true,
+  dueDate: true,
+  maximumRunTime: true,
   title: true,
 })
   .merge(TestCasesCreate)
   .merge(
     z.object({
       allowedLanguages: z.array(z.enum([allowedLanguages[0], ...allowedLanguages])).optional(),
+      maximumRunTime: z.number().min(0).max(15).optional().default(5),
+      dueDate: z
+        .string()
+        .optional()
+        .default(new Date(Date.now() + 1000 * 60 * 60 * 24 * 10).toISOString()),
     }),
   )
+  .merge(z.object({}))
 router.post('/', verifyRole(['Teacher']), async (req, res) => {
   const { body, loggedInUser } = req
 
   const validatedBody = CreateAssignment.parse(body)
+  console.log({ validatedBody })
+
   const assignment = await createAssignment(validatedBody, loggedInUser)
   return res.json(assignment)
 })
