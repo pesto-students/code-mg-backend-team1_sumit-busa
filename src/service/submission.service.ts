@@ -30,24 +30,29 @@ export const handleAssignmentSubmit = async (socket: ExtSocket, data: SubmitAssi
     socket.emit(EVENTS.submit, { type: 'uploaded', count: assignment.testCases.length })
 
     const promises = assignment.testCases.map((test) => {
-      return new Promise<{ type: string; status: Response & { expectedOutput: string } }>(async (resolve, reject) => {
-        try {
-          const response = await compile(
-            sourceCode,
-            language,
-            test.expectedOutput,
-            test.input,
-            assignment.maximumRunTime,
-          )
-          const result = { type: 'testCase', status: { ...response, expectedOutput: test.expectedOutput } }
-          socket.emit(EVENTS.submit, result)
-          console.log(result)
-          resolve(result)
-        } catch (ex) {
-          console.log(ex)
-          reject(ex)
-        }
-      })
+      return new Promise<{ type: string; status: Response & { expectedOutput: string; testId: number } }>(
+        async (resolve, reject) => {
+          try {
+            const response = await compile(
+              sourceCode,
+              language,
+              test.expectedOutput,
+              test.input,
+              assignment.maximumRunTime,
+            )
+            const result = {
+              type: 'testCase',
+              status: { ...response, expectedOutput: test.expectedOutput, testId: test.id },
+            }
+            socket.emit(EVENTS.submit, result)
+            console.log(result)
+            resolve(result)
+          } catch (ex) {
+            console.log(ex)
+            reject(ex)
+          }
+        },
+      )
     })
 
     const response = await Promise.all(promises)
