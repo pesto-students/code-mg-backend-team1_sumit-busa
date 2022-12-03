@@ -49,7 +49,7 @@ export const compile = async (
     language_id,
     expected_output,
     stdin,
-    cpu_time_limit,
+    wall_time_limit: cpu_time_limit,
   })
 
   const result = await fetchResult(token)
