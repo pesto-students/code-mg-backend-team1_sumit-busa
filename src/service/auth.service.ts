@@ -35,7 +35,7 @@ export const register = async (data: User, userRole: Role): Promise<User> => {
 }
 
 type loginPayload = { email: string; password: string }
-type resPayload = Promise<{ token: string }>
+type resPayload = Promise<{ token: string; role: Role }>
 export const login = async (data: loginPayload): resPayload => {
   const user = await prisma.user.findFirstOrThrow({
     where: { email: data.email },
@@ -60,7 +60,7 @@ export const login = async (data: loginPayload): resPayload => {
 
   logger.info('Login Successful')
 
-  return { token }
+  return { token, role: user.role }
 }
 
 export const resetPassword = async (loggedInUser: LoggedInUserType, newPassword: string) => {

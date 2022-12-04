@@ -10,9 +10,6 @@ import { z } from 'zod'
 const router = express.Router()
 router.use(auth())
 
-const TestCasesCreate = z.object({
-  testCases: z.array(TestCasesModel.pick({ expectedOutput: true, input: true })).min(1),
-})
 const allowedLanguages = Object.keys(Language) as Array<keyof typeof Language>
 export const CreateAssignment = AssignmentModel.pick({
   allowedLanguages: true,
@@ -21,19 +18,17 @@ export const CreateAssignment = AssignmentModel.pick({
   dueDate: true,
   maximumRunTime: true,
   title: true,
-})
-  .merge(TestCasesCreate)
-  .merge(
-    z.object({
-      allowedLanguages: z.array(z.enum([allowedLanguages[0], ...allowedLanguages])).optional(),
-      maximumRunTime: z.number().min(0).max(15).optional().default(5),
-      dueDate: z
-        .string()
-        .optional()
-        .default(new Date(Date.now() + 1000 * 60 * 60 * 24 * 10).toISOString()),
-    }),
-  )
-  .merge(z.object({}))
+}).merge(
+  z.object({
+    allowedLanguages: z.array(z.enum([allowedLanguages[0], ...allowedLanguages])).optional(),
+    maximumRunTime: z.number().min(0).max(15).optional().default(5),
+    testCases: z.array(TestCasesModel.pick({ expectedOutput: true, input: true })).min(1),
+    dueDate: z
+      .string()
+      .optional()
+      .default(new Date(Date.now() + 1000 * 60 * 60 * 24 * 10).toISOString()),
+  }),
+)
 router.post('/', verifyRole(['Teacher']), async (req, res) => {
   const { body, loggedInUser } = req
 
