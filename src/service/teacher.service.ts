@@ -24,7 +24,14 @@ export const getSubmissions = async (assignmentId: number, loggedInUser: LoggedI
   await validateClass(assignment?.classId, loggedInUser)
 
   const result = await prisma.submission.findMany({
-    select: { student: { select: { fullName: true, email: true } }, language: true, result: true, status: true },
+    select: {
+      id: true,
+      student: { select: { fullName: true, email: true } },
+      language: true,
+      result: true,
+      status: true,
+      updatedAt: true,
+    },
     where: { assignmentId },
   })
   return result
