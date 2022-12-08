@@ -22,6 +22,7 @@ export const Status = {
   tle: { id: 5, description: 'Time Limit Exceeded' },
   wrongAnswer: { id: 4, description: 'Wrong Answer' },
   accepted: { id: 3, description: 'Accepted' },
+  queue: { id: 1, description: 'In Queue' },
 } as const
 
 export type Response = {
@@ -62,7 +63,7 @@ const fetchResult = (token: string) =>
       try {
         const { data } = await axios.get<Response>(`${COMPILER_API}/submissions/${token}?base64_encoded=true`)
         console.log({ data })
-        if (data.status.id !== Status.processing.id) {
+        if (data.status.id !== Status.processing.id && data.status.id !== Status.queue.id) {
           clearInterval(timer)
           data.compile_output = decode(data.compile_output)
           data.message = decode(data.message)
