@@ -10,6 +10,7 @@ export const getAssignments = async (classId: number, loggedInUser: LoggedInUser
     select: {
       id: true,
       title: true,
+      dueDate: true,
       createdBy: { select: { fullName: true } },
       submissions: {
         select: { status: true, updatedAt: true },
