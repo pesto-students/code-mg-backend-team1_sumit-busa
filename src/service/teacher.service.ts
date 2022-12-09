@@ -34,5 +34,6 @@ export const getSubmissions = async (assignmentId: number, loggedInUser: LoggedI
     },
     where: { assignmentId },
   })
-  return result
+  
+  return { submissions: result, assignment }
 }
