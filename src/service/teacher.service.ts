@@ -37,3 +37,16 @@ export const getSubmissions = async (assignmentId: number, loggedInUser: LoggedI
   
   return { submissions: result, assignment }
 }
+
+export const getSubmission = async (submissionId: number, loggedInUser: LoggedInUserType) => {
+  const submission = await prisma.submission.findUniqueOrThrow({
+    where: { id: submissionId },
+    include: {
+      assignment: { select: { classId: true, problemStatement: true, title: true } },
+      student: { select: { fullName: true } },
+    },
+  })
+  await validateClass(submission.assignment.classId, loggedInUser)
+
+  return submission
+}
