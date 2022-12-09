@@ -1,6 +1,6 @@
 import { auth } from '@/config/passport'
 import verifyRole from '@/middlewares/auth'
-import { getAssignments, getSubmissions } from '@/service/teacher.service'
+import { getAssignments, getSubmission, getSubmissions } from '@/service/teacher.service'
 import express from 'express'
 
 const router = express.Router()
@@ -23,4 +23,11 @@ router.get('/submissions/:id', async (req, res) => {
   res.json(result)
 })
 
+router.get('/submission/:id', async (req, res) => {
+  const { loggedInUser } = req
+  const submissionId = parseInt(req.params.id)
+
+  const result = await getSubmission(submissionId, loggedInUser)
+  res.json(result)
+})
 export default router
