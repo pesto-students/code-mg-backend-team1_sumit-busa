@@ -1,3 +1,4 @@
+![Logo](./favicon.ico) 
 # Code MG
 
 CodeMg provides a way for teachers to evaluate coding assignments effectively by automating code compilation and checking assignments for plagiarism.
