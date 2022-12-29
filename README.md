@@ -1,3 +1,4 @@
+[<img src="./logo512.png" width="100"/>](CodeMg)
 # Code MG
 
 CodeMg provides a way for teachers to evaluate coding assignments effectively by automating code compilation and checking assignments for plagiarism.
