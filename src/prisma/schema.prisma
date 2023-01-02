@@ -1,0 +1,113 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["interactiveTransactions", "filteredRelationCount"]
+  binaryTargets   = ["native", "debian-openssl-1.1.x"]
+}
+
+generator zod {
+  provider = "zod-prisma"
+  output   = "./zod" // (default) the directory where generated zod schemas will be saved
+
+  relationModel = false // (default) Create and export both plain and related models.
+  // relationModel         = "default" // Do not export model without relations.
+  // relationModel         = false // Do not generate related model
+
+  modelCase = "PascalCase" // (default) Output models using pascal case (ex. UserModel, PostModel)
+  // modelCase             = "camelCase" // Output models using camel case (ex. userModel, postModel)
+
+  modelSuffix = "Model" // (default) Suffix to apply to your prisma models when naming Zod schemas
+
+  // useDecimalJs          = false // (default) represent the prisma Decimal type using as a JS number
+  useDecimalJs = true // represent the prisma Decimal type using Decimal.js (as Prisma does)
+
+  // https://www.prisma.io/docs/concepts/components/prisma-client/working-with-fields/working-with-json-fields#filtering-by-null-values
+  prismaJsonNullability = true // (default) uses prisma's scheme for JSON field nullability
+  // prismaJsonNullability = false // allows null assignment to optional JSON fields
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URI")
+}
+
+model User {
+  id              Int          @id @default(autoincrement())
+  fullName        String?      @db.VarChar(100)
+  email           String       @unique @db.VarChar(100)
+  mobile          String?      @db.VarChar(15)
+  password        String?      @db.VarChar(200)
+  role            Role
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  assignments     Assignment[]
+  createdClasses  Class[]      @relation(name: "teacher_class")
+  assignedClasses Class[]
+  submission      Submission[]
+}
+
+enum Role {
+  Admin
+  Teacher
+  Student
+}
+
+model Class {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String
+  createdById Int
+  createdBy   User         @relation(fields: [createdById], references: [id], name: "teacher_class")
+  students    User[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  assignments Assignment[]
+}
+
+model Assignment {
+  id               Int          @id @default(autoincrement())
+  title            String
+  problemStatement String
+  createdById      Int
+  createdBy        User         @relation(fields: [createdById], references: [id])
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  allowedLanguages String[]
+  submissions      Submission[]
+  dueDate          DateTime     @default(now())
+  maximumRunTime   Int          @default(5)
+  testCases        TestCases[]
+  Class            Class        @relation(fields: [classId], references: [id])
+  classId          Int
+}
+
+model TestCases {
+  id             Int        @id @default(autoincrement())
+  input          String
+  expectedOutput String
+  assignmentId   Int
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  assignment     Assignment @relation(fields: [assignmentId], references: [id])
+}
+
+model Submission {
+  id           Int              @id @default(autoincrement())
+  submission   String
+  language     String
+  assignmentId Int
+  studentId    Int
+  student      User             @relation(fields: [studentId], references: [id])
+  assignment   Assignment       @relation(fields: [assignmentId], references: [id])
+  status       SubmissionStatus @default(Processing)
+  result       Json?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@unique([assignmentId, studentId])
+}
+
+enum SubmissionStatus {
+  Processing
+  Pass
+  Fail
+}

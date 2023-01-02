@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+      "typeRoots": ["./src/types"],
+      "types": ["@types/jest"],
+      "esModuleInterop": true,
+      "strictNullChecks":true,
+      "target": "es2018",
+      "noImplicitAny": false,
+      "moduleResolution": "node",
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true,
+      "sourceMap": true,
+      "outDir": "build",
+      "baseUrl": ".",
+      "paths": {
+        "@/*": ["./src/*"],
+        "@@/*": ["./*"]
+      },
+      "module": "commonjs",
+      "skipLibCheck": true
+    },
+    "include": ["src/**/*"],
+    "exclude": ["build", "node_modules"]
+  }
+  
